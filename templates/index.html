@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green API - Send Message, File, and Check Status</title>
+    <style>
+        /* стиль страницы */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        
+        .input-container {
+            flex: 1;
+            margin-right: 20px; 
+        }
+
+        .big-button {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            margin: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .big-button:hover {
+            background-color: #45a049;
+        }
+
+        input[type="text"], textarea {
+            width: 100%; /* Установка ширины на 100% */
+            padding: 10px; /* Внутренние отступы */
+            font-size: 16px; /* Размер шрифта */
+            margin: 5px 0; /* Отступы */
+            border: 1px solid #ccc; /* Граница */
+            border-radius: 5px; /* Закругление углов */
+        }
+
+        .output-container {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        /* Стиль для поля вывода ответа */
+        #responseOutput {
+            width: 100%;
+            height: 400px; /* Увеличенный размер окна */
+            padding: 10px;
+            border: none;
+            background-color: #fff;
+            resize: none; /* Запрет изменения размера */
+            white-space: pre-wrap; /* Сохранение пробелов и перенос строк */
+            overflow-y: auto; /* Прокрутка при переполнении */
+            font-family: monospace; /* Шрифт для удобства чтения */
+        }
+    </style>
+</head>
+<body>
+    <div class="input-container">
+        <h1>Green API - Check API Status, Send WhatsApp Message and File</h1>
+
+        <!-- Поля ввода данных для всех операций -->
+        <div>
+            <label for="instanceId">Instance ID:</label>
+            <input type="text" id="instanceId" placeholder="Enter your Instance ID">
+        </div>
+
+        <div>
+            <label for="apiToken">API Token:</label>
+            <input type="text" id="apiToken" placeholder="Enter your API Token">
+        </div>
+
+        <button class="big-button" onclick="getSettings()">Get Settings</button>
+        <button class="big-button" onclick="getStateInstance()">Get State Instance</button>
+
+        <!-- Отправка текстового сообщения -->
+        <h2>Send WhatsApp Message</h2>
+        <div>
+            <label for="chatIdMessage">Phone Number for Message (without +):</label>
+            <input type="text" id="chatIdMessage" placeholder="Enter phone number for message">
+        </div>
+
+        <div>
+            <label for="message">Message:</label>
+            <textarea id="message" placeholder="Enter your message"></textarea>
+        </div>
+
+        <button class="big-button" onclick="sendMessage()">Send Message</button> <!-- Увеличенная кнопка -->
+
+        <!-- Отправка файла по URL -->
+        <h2>Send File via URL</h2>
+        <div>
+            <label for="chatIdFile">Phone Number for File (without +):</label>
+            <input type="text" id="chatIdFile" placeholder="Enter phone number for file">
+        </div>
+
+        <div>
+            <label for="fileUrl">File URL:</label>
+            <input type="text" id="fileUrl" placeholder="Enter file URL">
+        </div>
+
+        <button class="big-button" onclick="sendFileByUrl()">Send File</button> <!-- Увеличенная кнопка -->
+    </div>
+
+    <!-- Поле для вывода ответа -->
+    <div class="output-container">
+        <h3>API Response:</h3>
+        <textarea id="responseOutput" readonly></textarea> <!-- Изменено на textarea для чтения -->
+    </div>
+
+    <!-- Скрипт для отправки сообщений джава -->
+    <script>
+        async function getSettings() {
+            const instanceId = document.getElementById('instanceId').value;
+            const apiToken = document.getElementById('apiToken').value;
+
+            if (!instanceId || !apiToken) {
+                alert('Please provide Instance ID and API Token!');
+                return;
+            }
+
+            const response = await fetch('/get_settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ instanceId, apiToken })
+            });
+
+            const result = await response.json();
+            document.getElementById('responseOutput').innerText = JSON.stringify(result, null, 2);
+        }
+
+        async function getStateInstance() {
+            const instanceId = document.getElementById('instanceId').value;
+            const apiToken = document.getElementById('apiToken').value;
+
+            if (!instanceId || !apiToken) {
+                alert('Please provide Instance ID and API Token!');
+                return;
+            }
+
+            const response = await fetch('/get_state_instance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ instanceId, apiToken })
+            });
+
+            const result = await response.json();
+            document.getElementById('responseOutput').innerText = JSON.stringify(result, null, 2);
+        }
+
+        async function sendMessage() {
+            const instanceId = document.getElementById('instanceId').value;
+            const apiToken = document.getElementById('apiToken').value;
+            const chatIdMessage = document.getElementById('chatIdMessage').value;
+            const message = document.getElementById('message').value;
+
+            if (!instanceId || !apiToken || !chatIdMessage || !message) {
+                alert('Please fill all fields for sending a message!');
+                return;
+            }
+
+            const response = await fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ instanceId, apiToken, chatIdMessage, message })
+            });
+
+            const result = await response.json();
+            document.getElementById('responseOutput').innerText = JSON.stringify(result, null, 2);
+        }
+
+        async function sendFileByUrl() {
+            const instanceId = document.getElementById('instanceId').value;
+            const apiToken = document.getElementById('apiToken').value;
+            const chatIdFile = document.getElementById('chatIdFile').value;
+            const fileUrl = document.getElementById('fileUrl').value;
+
+            if (!instanceId || !apiToken || !chatIdFile || !fileUrl) {
+                alert('Please fill all fields for sending a file!');
+                return;
+            }
+
+            const response = await fetch('/send_file', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ instanceId, apiToken, chatIdFile, fileUrl })
+            });
+
+            const result = await response.json();
+            document.getElementById('responseOutput').innerText = JSON.stringify(result, null, 2);
+        }
+    </script>
+</body>
+</html>
